@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { login } from '../../utils/login';
 
 test('Sauce Demo Login | Click Button', async ({ page }) => {
     await page.goto('https://www.saucedemo.com/v1/');
@@ -19,11 +20,23 @@ test('Sauce Demo Login | Enter Button', async ({ page }) => {
     await page.close();
 });
 
-test('Add to Cart', async ({ page }) => {
+test('Call Function Login', async ({ page }) => {
+    await login(page, 'standard_user', 'secret_sauce');
+});
+
+test('Login by using element referencing', async ({ page }) => {
     await page.goto('https://www.saucedemo.com/v1/');
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
+    const username = page.locator('[data-test="username"]');
+    const password = page.locator('[data-test="password"]');
+    await username.fill('standard_user');
+    await password.fill('secret_sauce');
     await page.getByRole('button', { name: 'LOGIN' }).click();
+    await expect(page.getByText('Products', { exact: true })).toBeVisible();
+    await page.close();
+});
+
+test('Add to Cart', async ({ page }) => {
+    await login(page, 'standard_user', 'secret_sauce');
     await page.locator('div').filter({ hasText: /^\$29\.99ADD TO CART$/ }).getByRole('button').click();
     await expect(page.getByRole('button', { name: 'REMOVE' })).toBeVisible();
     await page.getByRole('link', { name: '1' }).click();
@@ -32,10 +45,7 @@ test('Add to Cart', async ({ page }) => {
 });
 
 test('Remove from Cart', async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/v1/');
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
-    await page.getByRole('button', { name: 'LOGIN' }).click();
+    await login(page, 'standard_user', 'secret_sauce');
     await page.locator('div').filter({ hasText: /^\$29\.99ADD TO CART$/ }).getByRole('button').click();
     await expect(page.getByRole('button', { name: 'REMOVE' })).toBeVisible();
     await page.getByRole('button', { name: 'REMOVE' }).click();
@@ -44,10 +54,7 @@ test('Remove from Cart', async ({ page }) => {
 });
 
 test('Burger Menu', async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/v1/');
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
-    await page.getByRole('button', { name: 'LOGIN' }).click();
+    await login(page, 'standard_user', 'secret_sauce');
     await page.getByRole('button', { name: 'Open Menu' }).click();
     await page.getByRole('link', { name: 'About' }).click();
     await expect(page.getByRole('link', { name: 'Saucelabs' })).toBeVisible();
@@ -55,10 +62,7 @@ test('Burger Menu', async ({ page }) => {
 });
 
 test('Filter', async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/v1/');
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
-    await page.getByRole('button', { name: 'LOGIN' }).click();
+    await login(page, 'standard_user', 'secret_sauce');
     await page.getByRole('combobox').selectOption('za');
 
     // Extract the text content from all cards
@@ -74,10 +78,7 @@ test('Filter', async ({ page }) => {
 });
 
 test('New Tab', async ({ page, context }) => {
-    await page.goto('https://www.saucedemo.com/v1/');
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
-    await page.getByRole('button', { name: 'LOGIN' }).click();
+    await login(page, 'standard_user', 'secret_sauce');
 
     // Locate and open a product link in a new tab
     const productSelector = 'a#item_4_title_link'; // Replace with your selector
